@@ -3,7 +3,7 @@
 
 --------------------
 ### Tank Combat Arena 
-Tank battle with independent turret rotaƟon.
+Tank battle with independent turret rotation.
 
 ### Custom Message:
 TankCommand.msg (track_left_speed, track_right_speed, turret_angle, fire_cannon,
