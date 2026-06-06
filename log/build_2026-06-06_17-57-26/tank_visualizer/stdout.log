@@ -1,0 +1,45 @@
+running egg_info
+creating ../../build/tank_visualizer/tank_visualizer.egg-info
+writing ../../build/tank_visualizer/tank_visualizer.egg-info/PKG-INFO
+writing dependency_links to ../../build/tank_visualizer/tank_visualizer.egg-info/dependency_links.txt
+writing entry points to ../../build/tank_visualizer/tank_visualizer.egg-info/entry_points.txt
+writing requirements to ../../build/tank_visualizer/tank_visualizer.egg-info/requires.txt
+writing top-level names to ../../build/tank_visualizer/tank_visualizer.egg-info/top_level.txt
+writing manifest file '../../build/tank_visualizer/tank_visualizer.egg-info/SOURCES.txt'
+reading manifest file '../../build/tank_visualizer/tank_visualizer.egg-info/SOURCES.txt'
+writing manifest file '../../build/tank_visualizer/tank_visualizer.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /mnt/c/tank_visualizer (2)/build/tank_visualizer/build
+creating /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib
+creating /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer
+copying tank_visualizer/keyboard_teleop.py -> /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer
+copying tank_visualizer/tank_body_node.py -> /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer
+copying tank_visualizer/turret_controller.py -> /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer
+copying tank_visualizer/__init__.py -> /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer
+running install
+running install_lib
+creating /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer
+copying /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer/keyboard_teleop.py -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer
+copying /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer/tank_body_node.py -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer
+copying /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer/turret_controller.py -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer
+copying /mnt/c/tank_visualizer (2)/build/tank_visualizer/build/lib/tank_visualizer/__init__.py -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer
+byte-compiling /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer/keyboard_teleop.py to keyboard_teleop.cpython-310.pyc
+byte-compiling /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer/tank_body_node.py to tank_body_node.cpython-310.pyc
+byte-compiling /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer/turret_controller.py to turret_controller.cpython-310.pyc
+byte-compiling /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/ament_index
+creating /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/ament_index/resource_index
+creating /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/ament_index/resource_index/packages
+copying resource/tank_visualizer -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/ament_index/resource_index/packages
+copying package.xml -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/tank_visualizer
+creating /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/tank_visualizer/launch
+copying launch/tank_visualizer_with_turret.launch.py -> /mnt/c/tank_visualizer (2)/install/tank_visualizer/share/tank_visualizer/launch
+running install_egg_info
+Copying ../../build/tank_visualizer/tank_visualizer.egg-info to /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/python3.10/site-packages/tank_visualizer-0.0.0-py3.10.egg-info
+running install_scripts
+Installing keyboard_teleop script to /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/tank_visualizer
+Installing tank_body_node script to /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/tank_visualizer
+Installing turret_controller script to /mnt/c/tank_visualizer (2)/install/tank_visualizer/lib/tank_visualizer
+writing list of installed files to '/mnt/c/tank_visualizer (2)/build/tank_visualizer/install.log'
