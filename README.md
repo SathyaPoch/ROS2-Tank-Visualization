@@ -6,7 +6,7 @@
 Tank battle with independent turret rotaƟon.
 
 ### Custom Message:
-TankCommand.msg (track_leŌ_speed, track_right_speed, turret_angle, fire_cannon,
+TankCommand.msg (track_left_speed, track_right_speed, turret_angle, fire_cannon,
 fire_machinegun). 
 
 ### Keyboard Control: 
