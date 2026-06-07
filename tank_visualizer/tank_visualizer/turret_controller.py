@@ -21,7 +21,6 @@ class TurretController(Node):
         self.timer = self.create_timer(0.05, self.update_turret)
         
         self.get_logger().info('Turret Controller Started!')
-        self.print_controls()
     
     def update_turret(self):
         """Update and publish turret position"""
