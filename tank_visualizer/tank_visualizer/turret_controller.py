@@ -31,12 +31,6 @@ class TurretController(Node):
         self.yaw_pub.publish(yaw_msg)
         self.pitch_pub.publish(pitch_msg)
         
-        self.turret_yaw += 0.02
-        if self.turret_yaw > 2 * math.pi:
-            self.turret_yaw -= 2 * math.pi
-      
-        self.cannon_pitch = 0.3 * math.sin(self.get_clock().now().nanoseconds / 1e9)
-
 def main(args=None):
     rclpy.init(args=args)
     controller = TurretController()
