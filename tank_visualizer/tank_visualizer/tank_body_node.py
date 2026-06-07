@@ -166,7 +166,7 @@ class TankBodyVisualizer(Node):
         cannon.color.a = 1.0
         cannon.pose.position.x = (self.cannon_length / 2.0) * math.cos(self.cannon_pitch)
         cannon.pose.position.z = self.turret_height + (self.cannon_length / 2.0) * math.sin(self.cannon_pitch)
-        cannon.pose.orientation = euler_to_quaternion(yaw=0, pitch=self.cannon_pitch, roll=0)
+        cannon.pose.orientation = euler_to_quaternion(yaw=0, pitch=-math.pi/2 + self.cannon_pitch, roll=0)
         marker_array.markers.append(cannon)
 
         self.marker_array_pub.publish(marker_array)

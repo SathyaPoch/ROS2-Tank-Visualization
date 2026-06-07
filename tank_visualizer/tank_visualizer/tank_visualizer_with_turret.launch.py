@@ -10,11 +10,4 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
-        Node(
-            package='tank_visualizer',
-            executable='turret_controller',
-            name='turret_controller',
-            output='screen',
-            emulate_tty=True,
-        ),
     ])
