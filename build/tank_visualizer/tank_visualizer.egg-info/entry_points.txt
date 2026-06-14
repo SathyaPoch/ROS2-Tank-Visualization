@@ -1,5 +1,0 @@
-[console_scripts]
-keyboard_teleop = tank_visualizer.keyboard_teleop:main
-tank_body_node = tank_visualizer.tank_body_node:main
-turret_controller = tank_visualizer.turret_controller:main
-
