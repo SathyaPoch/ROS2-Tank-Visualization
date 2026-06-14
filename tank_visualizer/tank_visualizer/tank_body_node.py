@@ -48,6 +48,14 @@ class TankBodyVisualizer(Node):
         self.cannon_length = 0.6
         self.cannon_radius = 0.05
 
+        # --- Machine gun dimensions ---
+        self.mg_body_length = 0.18
+        self.mg_body_width  = 0.08
+        self.mg_body_height = 0.08
+        self.mg_barrel_length = 0.28
+        self.mg_barrel_radius = 0.018
+        self.mg_tilt = 0.15   # radians upward tilt (~8.6 degrees)
+
         self.create_timer(0.05, self.timer_callback)
         self.get_logger().info('Tank Body Visualizer Node Started')
 
@@ -150,7 +158,6 @@ class TankBodyVisualizer(Node):
         turret_base.pose.position.z = self.turret_height / 2.0
         marker_array.markers.append(turret_base)
 
-  
         cannon = Marker()
         cannon.header.stamp = time_now
         cannon.header.frame_id = 'tank_turret'
@@ -169,12 +176,90 @@ class TankBodyVisualizer(Node):
         cannon.pose.orientation = euler_to_quaternion(yaw=0, pitch=-math.pi/2 + self.cannon_pitch, roll=0)
         marker_array.markers.append(cannon)
 
+        # -------------------------------------------------------
+        # MACHINE GUN — mounted on top of the turret, right side
+        # Follows turret yaw automatically (frame_id = 'tank_turret')
+        # -------------------------------------------------------
+
+        # Mount offset: slightly to the right (+y) and on top of the turret
+        mg_mount_x = 0.05   # slightly forward
+        mg_mount_y = 0.15   # offset to the right of turret center
+        mg_mount_z = self.turret_height + self.mg_body_height / 2.0
+
+        # MG body (box — the receiver/housing)
+        mg_body = Marker()
+        mg_body.header.stamp = time_now
+        mg_body.header.frame_id = 'tank_turret'
+        mg_body.id = 200
+        mg_body.type = Marker.CUBE
+        mg_body.action = Marker.ADD
+        mg_body.scale.x = self.mg_body_length
+        mg_body.scale.y = self.mg_body_width
+        mg_body.scale.z = self.mg_body_height
+        mg_body.color.r = 0.25
+        mg_body.color.g = 0.25
+        mg_body.color.b = 0.25
+        mg_body.color.a = 1.0
+        mg_body.pose.position.x = mg_mount_x
+        mg_body.pose.position.y = mg_mount_y
+        mg_body.pose.position.z = mg_mount_z
+        mg_body.pose.orientation = euler_to_quaternion(yaw=0, pitch=0, roll=0)
+        marker_array.markers.append(mg_body)
+
+        # MG barrel (cylinder — tilted slightly upward)
+        barrel_tip_offset_x = (self.mg_barrel_length / 2.0) * math.cos(self.mg_tilt)
+        barrel_tip_offset_z = (self.mg_barrel_length / 2.0) * math.sin(self.mg_tilt)
+
+        mg_barrel = Marker()
+        mg_barrel.header.stamp = time_now
+        mg_barrel.header.frame_id = 'tank_turret'
+        mg_barrel.id = 201
+        mg_barrel.type = Marker.CYLINDER
+        mg_barrel.action = Marker.ADD
+        mg_barrel.scale.x = self.mg_barrel_radius * 2
+        mg_barrel.scale.y = self.mg_barrel_radius * 2
+        mg_barrel.scale.z = self.mg_barrel_length
+        mg_barrel.color.r = 0.15
+        mg_barrel.color.g = 0.15
+        mg_barrel.color.b = 0.15
+        mg_barrel.color.a = 1.0
+        mg_barrel.pose.position.x = mg_mount_x + barrel_tip_offset_x
+        mg_barrel.pose.position.y = mg_mount_y
+        mg_barrel.pose.position.z = mg_mount_z + barrel_tip_offset_z
+        # Tilt barrel upward by mg_tilt radians (pitch)
+        mg_barrel.pose.orientation = euler_to_quaternion(yaw=0, pitch=-math.pi/2 + self.mg_tilt, roll=0)
+        marker_array.markers.append(mg_barrel)
+
+        # MG ammo box (small box on the side of the receiver)
+        mg_ammo = Marker()
+        mg_ammo.header.stamp = time_now
+        mg_ammo.header.frame_id = 'tank_turret'
+        mg_ammo.id = 202
+        mg_ammo.type = Marker.CUBE
+        mg_ammo.action = Marker.ADD
+        mg_ammo.scale.x = 0.10
+        mg_ammo.scale.y = 0.06
+        mg_ammo.scale.z = 0.06
+        mg_ammo.color.r = 0.45
+        mg_ammo.color.g = 0.35
+        mg_ammo.color.b = 0.1
+        mg_ammo.color.a = 1.0
+        mg_ammo.pose.position.x = mg_mount_x
+        mg_ammo.pose.position.y = mg_mount_y + self.mg_body_width / 2.0 + 0.04
+        mg_ammo.pose.position.z = mg_mount_z - 0.01
+        mg_ammo.pose.orientation = euler_to_quaternion(yaw=0, pitch=0, roll=0)
+        marker_array.markers.append(mg_ammo)
+
+        # -------------------------------------------------------
+
         self.marker_array_pub.publish(marker_array)
+
 def main(args=None):
     rclpy.init(args=args)
     node = TankBodyVisualizer()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
 if __name__ == '__main__':
     main()
