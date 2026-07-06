@@ -47,6 +47,7 @@ class TankBodyVisualizer(Node):
         #   Cannon shells: 600 – 699   (max 100 in flight)
         #   MG bullets:    700 – 799   (max 100 in flight)
         #   Sparks:       800 – 2099   (max 1300 active particles)
+        #   Walls:        3000+
         # -------------------------------------------------------
         self.projectiles      = []        # cannon shells
         self.mg_projectiles   = []        # MG bullets
@@ -83,6 +84,20 @@ class TankBodyVisualizer(Node):
         self.mg_barrel_length = 0.28
         self.mg_barrel_radius = 0.018
         self.mg_tilt          = 0.15
+
+        # --- Wall / corridor dimensions ---
+        self.wall_thickness  = 0.1
+        self.wall_height     = 0.4
+        self.corridor_width  = 1.8     # clear space between inner wall faces (tank body_width = 0.6)
+        self.segment_length  = 6.0     # length of each straight section
+        self.corner_origin   = (1.5, -2.0)  # where the corridor starts, tweak to taste
+
+        self.wall_segments = self._build_wall_segments()
+        self.wall_aabbs    = self._compute_wall_aabbs()
+
+        # Bounding circle radius used for tank-vs-wall collision checks.
+        # (Half the tank's diagonal — a safe over-approximation of the rectangular body.)
+        self.collision_radius = math.hypot(self.body_length / 2.0, self.body_width / 2.0)
 
         self.create_timer(0.05, self.timer_callback)
         self.get_logger().info('Tank Body Visualizer Node Started')
@@ -499,6 +514,101 @@ class TankBodyVisualizer(Node):
         return markers
 
     # ------------------------------------------------------------------
+    # Wall / corridor builders
+    # ------------------------------------------------------------------
+
+    def _build_wall_segments(self):
+        """
+        Build a right-angle corridor: straight east, turn right, straight south.
+        Returns a list of (x_center, y_center, length, thickness, yaw) for CUBE markers.
+        Outer wall corner is squared off, inner wall corner is cut back,
+        so the turn is actually driveable.
+        """
+        ox, oy = self.corner_origin
+        L  = self.segment_length
+        hw = self.corridor_width / 2.0
+        t  = self.wall_thickness
+
+        segs = []
+
+        # --- Outer wall (the wide/outside of the turn) ---
+        # Segment 1: runs along x, from ox to ox+L+hw (extended to cover the corner)
+        seg1_len = L + hw
+        segs.append((ox + seg1_len / 2.0, oy + hw, seg1_len, t, 0.0))
+
+        # Segment 2: runs along y (south), from oy+hw down to oy-L
+        seg2_len = L + hw
+        segs.append((ox + L + hw, oy + hw - seg2_len / 2.0, seg2_len, t, math.pi / 2.0))
+
+        # --- Inner wall (the tight/inside of the turn) ---
+        # Segment 1: cut short so the corner opening isn't blocked
+        seg3_len = L - hw
+        segs.append((ox + seg3_len / 2.0, oy - hw, seg3_len, t, 0.0))
+
+        # Segment 2: also cut short
+        seg4_len = L - hw
+        segs.append((ox + L - hw, oy - hw - seg4_len / 2.0, seg4_len, t, math.pi / 2.0))
+
+        return segs
+
+    def _compute_wall_aabbs(self):
+        """
+        Convert each wall segment into an axis-aligned bounding box
+        (xmin, xmax, ymin, ymax). Safe because every wall segment's yaw
+        is either 0 (horizontal) or pi/2 (vertical) — no diagonal walls.
+        """
+        aabbs = []
+        for (cx, cy, length, thickness, yaw) in self.wall_segments:
+            half_len   = length / 2.0
+            half_thick = thickness / 2.0
+            if abs(math.sin(yaw)) < 0.5:
+                # horizontal segment: long along x, thin along y
+                aabbs.append((cx - half_len, cx + half_len, cy - half_thick, cy + half_thick))
+            else:
+                # vertical segment: thin along x, long along y
+                aabbs.append((cx - half_thick, cx + half_thick, cy - half_len, cy + half_len))
+        return aabbs
+
+    def _collides_with_walls(self, x, y):
+        """
+        Circle-vs-AABB test: True if a circle of radius self.collision_radius
+        centered at (x, y) overlaps any wall's bounding box.
+        """
+        r2 = self.collision_radius * self.collision_radius
+        for (xmin, xmax, ymin, ymax) in self.wall_aabbs:
+            closest_x = max(xmin, min(x, xmax))
+            closest_y = max(ymin, min(y, ymax))
+            dx = x - closest_x
+            dy = y - closest_y
+            if dx * dx + dy * dy < r2:
+                return True
+        return False
+
+    def build_wall_markers(self, time_now):
+        markers = []
+        for i, (cx, cy, length, thickness, yaw) in enumerate(self.wall_segments):
+            m = Marker()
+            m.header.stamp    = time_now
+            m.header.frame_id = 'map'
+            m.ns     = 'walls'
+            m.id     = 3000 + i
+            m.type   = Marker.CUBE
+            m.action = Marker.ADD
+            m.scale.x = length
+            m.scale.y = thickness
+            m.scale.z = self.wall_height
+            m.color.r = 0.5
+            m.color.g = 0.5
+            m.color.b = 0.5
+            m.color.a = 1.0
+            m.pose.position.x = cx
+            m.pose.position.y = cy
+            m.pose.position.z = self.wall_height / 2.0
+            m.pose.orientation = euler_to_quaternion(yaw=yaw, pitch=0, roll=0)
+            markers.append(m)
+        return markers
+
+    # ------------------------------------------------------------------
     # Tank marker builder (unchanged from original)
     # ------------------------------------------------------------------
 
@@ -663,10 +773,23 @@ class TankBodyVisualizer(Node):
         time_now = self.get_clock().now().to_msg()
         dt = 0.05
 
-        # --- Tank 1 movement ---
+        # --- Tank 1 movement (with wall collision) ---
         self.theta += self.angular_velocity * dt
-        self.x    += self.linear_velocity * math.cos(self.theta) * dt
-        self.y    += self.linear_velocity * math.sin(self.theta) * dt
+
+        candidate_x = self.x + self.linear_velocity * math.cos(self.theta) * dt
+        candidate_y = self.y + self.linear_velocity * math.sin(self.theta) * dt
+
+        if not self._collides_with_walls(candidate_x, candidate_y):
+            # No collision — move freely
+            self.x = candidate_x
+            self.y = candidate_y
+        elif not self._collides_with_walls(candidate_x, self.y):
+            # Blocked diagonally, but sliding along x alone is clear
+            self.x = candidate_x
+        elif not self._collides_with_walls(self.x, candidate_y):
+            # Sliding along y alone is clear
+            self.y = candidate_y
+        # else: fully blocked — tank stays put this tick
 
         # --- Fire cooldown tick ---
         self.fire_cooldown = max(0.0, self.fire_cooldown - dt)
@@ -737,6 +860,9 @@ class TankBodyVisualizer(Node):
             marker_array.markers.append(m)
 
         for m in self.build_spark_markers(time_now):
+            marker_array.markers.append(m)
+
+        for m in self.build_wall_markers(time_now):
             marker_array.markers.append(m)
 
         self.marker_array_pub.publish(marker_array)
