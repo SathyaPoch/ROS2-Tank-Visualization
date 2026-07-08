@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Empty
 import sys
 import tty
 import termios
@@ -27,11 +27,13 @@ def get_key(settings):
 class KeyboardTeleop(Node):
     def __init__(self):
         super().__init__('keyboard_teleop')
-        self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
-        self.turret_pub = self.create_publisher(Float32, '/turret/yaw_command', 10)
+        self.publisher   = self.create_publisher(Twist,  '/cmd_vel', 10)
+        self.turret_pub  = self.create_publisher(Float32, '/turret/yaw_command', 10)
+        self.fire_pub    = self.create_publisher(Empty,  '/tank/fire', 10)  
+        self.fire_mg_pub = self.create_publisher(Empty,  '/tank/fire_mg', 10) 
 
-        self.turret_yaw = 0.0
-        self.turret_yaw_vel = 0.0  # velocity set by keys
+        self.turret_yaw     = 0.0
+        self.turret_yaw_vel = 0.0
 
         self.settings = termios.tcgetattr(sys.stdin)
 
@@ -44,9 +46,10 @@ class KeyboardTeleop(Node):
             '  S = Backward\n'
             '  A = Turn Left\n'
             '  D = Turn Right\n'
-            '  J = Turret Left (hold)\n'
-            '  L = Turret Right (hold)\n'
-            '  Space/other = STOP turret\n'
+            '  J = Turret Left\n'
+            '  L = Turret Right\n'
+            '  SPACE = FIRE CANNON\n'
+            '  K = FIRE MACHINE GUN\n'
             '  Ctrl+C to quit\n'
         )
 
@@ -74,10 +77,16 @@ class KeyboardTeleop(Node):
                     self.turret_yaw_vel = -TURRET_SPEED
                 elif key == 'l':
                     self.turret_yaw_vel = TURRET_SPEED
+                elif key == ' ':                 
+                    self.fire_pub.publish(Empty())
+                    self.get_logger().info('FIRE!')
+                elif key == 'k':
+                    self.fire_mg_pub.publish(Empty())
+                    self.get_logger().info('MG — FIRE!')
                 elif key == '\x03':
                     break
                 else:
-                    self.turret_yaw_vel = 0.0  # any other key stops turret
+                    self.turret_yaw_vel = 0.0
                     self.get_logger().info('STOP')
 
                 self.publisher.publish(twist)

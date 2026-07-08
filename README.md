@@ -15,3 +15,8 @@ WASD for tank movement, Arrow keys for turret, Space
 
 ### Visualization:
 rviz2 with separate body and turret markers.
+
+### Current in branch shooting_canon
+i = stop
+k = shoot machine gun
+space = shoot cannon
