@@ -80,6 +80,7 @@ class TankBodyVisualizer(Node):
         self.auto_wp_index      = 0
         self.auto_fire_cooldown = random.uniform(2.0, 3.0)
         self.auto_mg_cooldown   = random.uniform(1.2, 2.0)
+        self.startup_grace_period = 5.0
 
         # --- Health / combat state ---
         self.MAX_HP        = 20.0
@@ -417,6 +418,11 @@ class TankBodyVisualizer(Node):
     def _apply_damage(self, shooter_source, dmg):
         """shooter_source is who FIRED the shot; damage lands on the other tank."""
         if self.game_over:
+            return
+
+        # Give the player a short spawn grace period so Tank 2 cannot
+        # immediately end the match before the first movement input.
+        if self.startup_grace_period > 0.0 and shooter_source == 'tank2':
             return
 
         if shooter_source == 'tank1':
@@ -804,6 +810,11 @@ class TankBodyVisualizer(Node):
             fill.pose.orientation = euler_to_quaternion(yaw=theta, pitch=0, roll=0)
             markers.append(fill)
 
+            # Offset the text to the left end of the bar so it co-rotates
+            # with the bar as the tank turns.  The bar is bar_length wide and
+            # aligned along theta, so shift by bar_length/2 in the +theta
+            # direction to reach the leading edge.
+            text_offset = bar_length / 2.0 + 0.08   # slightly beyond the bar edge
             text = Marker()
             text.header.stamp    = time_now
             text.header.frame_id = 'map'
@@ -814,8 +825,8 @@ class TankBodyVisualizer(Node):
             text.scale.z = 0.18
             text.color.r = text.color.g = text.color.b = 1.0
             text.color.a = 1.0
-            text.pose.position.x = x
-            text.pose.position.y = y
+            text.pose.position.x = x + text_offset * math.cos(theta)
+            text.pose.position.y = y + text_offset * math.sin(theta)
             text.pose.position.z = base_z + 0.22
             text.pose.orientation.w = 1.0
             text.text = 'HP: {:.1f}'.format(hp)
@@ -1167,6 +1178,9 @@ class TankBodyVisualizer(Node):
     def timer_callback(self):
         time_now = self.get_clock().now().to_msg()
         dt = 0.05
+
+        if self.startup_grace_period > 0.0:
+            self.startup_grace_period = max(0.0, self.startup_grace_period - dt)
 
         if not self.game_over:
             # --- Tank 1 movement (with wall collision) ---
