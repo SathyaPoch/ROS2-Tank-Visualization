@@ -7,7 +7,8 @@ package_name = 'tank_visualizer'
 setup(
     name=package_name,
     version='0.0.0',
-    packages=find_packages(exclude=['test']),
+    package_dir={'': 'tank_visualizer'},
+    packages=find_packages(where='tank_visualizer', exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -30,7 +31,7 @@ setup(
         'console_scripts': [
             'tank_body_node = tank_visualizer.tank_body_node:main',
             'turret_controller = tank_visualizer.turret_controller:main',
-            'keyboard_teleop    = tank_visualizer.keyboard_teleop:main',  # ← ADD THIS
+            'keyboard_teleop    = tank_visualizer.keyboard_controller:main',
         ],
     },
 )
