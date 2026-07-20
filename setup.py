@@ -32,6 +32,7 @@ setup(
             'tank_body_node = tank_visualizer.tank_body_node:main',
             'turret_controller = tank_visualizer.turret_controller:main',
             'keyboard_teleop    = tank_visualizer.keyboard_controller:main',
+            'tank_state_subscriber = tank_visualizer.tank_state_subscriber:main',
         ],
     },
 )

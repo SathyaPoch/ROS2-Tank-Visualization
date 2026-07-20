@@ -68,8 +68,7 @@ class TankBodyVisualizer(Node):
 
         # ── ROS2 pub / sub ──
         self.marker_array_pub = self.create_publisher(MarkerArray, '/tank_body_markers', 10)
-        self.tank1_state_pub  = self.create_publisher(TankState, '/tank1/state', 10)
-        self.tank2_state_pub  = self.create_publisher(TankState, '/tank2/state', 10)
+        self.tank_state_pub   = self.create_publisher(TankState, '/tank_state', 10)
 
         self.create_subscription(Float32, '/turret/yaw_command',   self.turret_yaw_callback,   10)
         self.create_subscription(Float32, '/turret/pitch_command', self.cannon_pitch_callback,  10)
@@ -681,42 +680,24 @@ class TankBodyVisualizer(Node):
     # ------------------------------------------------------------------
 
     def _publish_tank_states(self, time_now):
-        """Build and publish TankState messages for both tanks."""
+        """Build and publish a single TankState message for tank1."""
         logic = self.logic
 
-        # --- Tank 1 ---
-        t1 = TankState()
-        t1.header.stamp    = time_now
-        t1.header.frame_id = 'map'
-        t1.x               = logic.x
-        t1.y               = logic.y
-        t1.theta           = logic.theta
-        t1.turret_yaw      = logic.turret_yaw
-        t1.cannon_pitch    = logic.cannon_pitch
-        t1.linear_velocity = logic.linear_velocity
-        t1.angular_velocity = logic.angular_velocity
-        t1.health          = logic.hp1
-        t1.max_health      = float(logic.MAX_HP)
-        t1.is_alive        = logic.hp1 > 0
-        t1.tank_name       = 'tank1'
-        self.tank1_state_pub.publish(t1)
-
-        # --- Tank 2 ---
-        t2 = TankState()
-        t2.header.stamp    = time_now
-        t2.header.frame_id = 'map'
-        t2.x               = logic.x2
-        t2.y               = logic.y2
-        t2.theta           = logic.theta2
-        t2.turret_yaw      = logic.turret_yaw2
-        t2.cannon_pitch    = logic.cannon_pitch2
-        t2.linear_velocity = 0.0  # Tank 2 speed is internal to the bot
-        t2.angular_velocity = 0.0
-        t2.health          = logic.hp2
-        t2.max_health      = float(logic.MAX_HP)
-        t2.is_alive        = logic.hp2 > 0
-        t2.tank_name       = 'tank2'
-        self.tank2_state_pub.publish(t2)
+        state = TankState()
+        state.header.stamp    = time_now
+        state.header.frame_id = 'map'
+        state.x               = logic.x
+        state.y               = logic.y
+        state.theta           = logic.theta
+        state.turret_yaw      = logic.turret_yaw
+        state.cannon_pitch    = logic.cannon_pitch
+        state.linear_velocity = logic.linear_velocity
+        state.angular_velocity = logic.angular_velocity
+        state.health          = logic.hp1
+        state.max_health      = float(logic.MAX_HP)
+        state.is_alive        = logic.hp1 > 0
+        state.tank_name       = 'tank1'
+        self.tank_state_pub.publish(state)
 
 
 def main(args=None):
